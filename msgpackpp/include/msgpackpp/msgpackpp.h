@@ -1186,7 +1186,19 @@ public:
           os << "false";
         }
       } else if (is_number()) {
-        os << get_number<double>();
+        const auto d = get_number<double>();
+        if (std::isfinite(d)) {
+          os << d;
+        } else {
+          // see https://learn.microsoft.com/dotnet/api/system.text.json.serialization.jsonnumberhandling
+          if (std::isnan(d)) {
+            os << "\"NaN\"";
+          } else if (d == std::numeric_limits<double>::infinity()) {
+            os << "\"Infinity\"";
+          } else if (d == -std::numeric_limits<double>::infinity()) {
+            os << "\"-Infinity\"";
+          }
+        }
       } else if (is_string()) {
         os << '"' << get_string() << '"';
       } else if (is_binary()) {
